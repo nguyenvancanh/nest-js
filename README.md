@@ -179,4 +179,151 @@ sẽ tạo cho chúng ta file _books.service.ts_ trong thư mục /src/books
 
 ## Tạo method Get books
 
+Mở file service bên trên vừa được khởi tạo và paste dòng code này vào
 
+```
+//  ./src/books/books.service.ts
+
+  import { Injectable, HttpException } from '@nestjs/common';
+  import { BOOKS } from '../mocks/books.mock';
+
+  @Injectable()
+  export class BooksService {
+      books = BOOKS;
+
+      getBooks(): Promise<any> {
+          return new Promise(resolve => {
+              resolve(this.books);
+          });
+      }
+      getBook(bookID): Promise<any> {
+          let id = Number(bookID);
+          return new Promise(resolve => {
+              const book = this.books.find(book => book.id === id);
+              if (!book) {
+                  throw new HttpException('Book does not exist!', 404);
+              }
+              resolve(book);
+          });
+      }
+  }
+``` 
+
+Đầu tiên là bạn import một số module cần thiết từ NestJs và BOOKS từ mocks data bạn tạo ở bước trên. Tiếp theo là tạo 2 methos getBooks() và getBook(). Method getBooks() trả về tất cả books có trong dữ liệu của bạn, còn method getBook() thì sẽ trả về 1 giá trị với bookId được truyền vào.
+
+## Thêm mới sách
+
+Thêm method addBook() vào file service bên trên, phía dưới hàm getBook()
+
+```
+ addBook(book): Promise<any> {
+        return new Promise(resolve => {
+            this.books.push(book);
+            resolve(this.books);
+        });
+    }
+```
+
+## Xóa sách
+
+Tương tự như trên, thêm method deleteBook() vào 
+
+```
+//  ./src/books/books.service.ts
+
+import { Injectable, HttpException } from '@nestjs/common';
+import { BOOKS } from '../mocks/books.mock';
+@Injectable()
+export class BooksService {
+    books = BOOKS;
+    ...
+    deleteBook(bookID): Promise<any> {
+        let id = Number(bookID);
+        return new Promise(resolve => {
+            let index = this.books.findIndex(book => book.id === id);
+            if (index === -1) {
+                throw new HttpException('Book does not exist!', 404);
+            }
+            this.books.splice(1, index);
+            resolve(this.books);
+        });
+    }
+}
+```
+
+## Inject Service vào trong Controller
+
+Mở file controller lên và thêm đoạn code sau
+
+```
+// ./src/books/books.controller.ts
+
+import { Controller, Get, Param, Post, Body, Query, Delete } from '@nestjs/common';
+import { BooksService } from './books.service';
+import { CreateBookDTO } from './dto/create-book.dto';
+
+@Controller('books')
+export class BooksController {
+    constructor(private booksService: BooksService) { }
+
+    @Get()
+    async getBooks() {
+        const books = await this.booksService.getBooks();
+        return books;
+    }
+
+    @Get(':bookID')
+    async getBook(@Param('bookID') bookID) {
+        const book = await this.booksService.getBook(bookID);
+        return book;
+    }
+
+    @Post()
+    async addBook(@Body() createBookDTO: CreateBookDTO) {
+        const book = await this.booksService.addBook(createBookDTO);
+        return book;
+    }
+
+    @Delete()
+    async deleteBook(@Query() query) {
+        const books = await this.booksService.deleteBook(query.bookID);
+        return books;
+    }
+}
+```
+
+Ở trong file Controoler bạn để ý rằng chúng ta có sử dụng CreateBookDTO, nó là một object để chuyển đổi dữ liệu, hiểu đơn giản là một class được tạo ra để validate giá trị của input đầu vào của bạn. Được định nghĩa như sau
+
+```
+// ./src/books/dto/create-book.dto.ts
+
+export class CreateBookDTO {
+    readonly id: number;
+    readonly title: string;
+    readonly description: string;
+    readonly author: string;
+}
+```
+
+Quay lại file Module một chút và update lại code
+
+```
+// ./src/books/books.module.ts
+
+import { Module } from '@nestjs/common';
+import { BooksController } from './books.controller';
+import { BooksService } from './books.service';
+@Module({
+  controllers: [BooksController],
+  providers: [BooksService]
+})
+export class BooksModule {}
+```
+
+Chạy lại 
+
+```
+npm run start
+```
+
+và k
