@@ -326,4 +326,6 @@ Chạy lại
 npm run start
 ```
 
-và kiểm tra kết quả trên web. chúc m
+và kiểm tra kết quả trên web. chúc mọi người thành công. ^^
+
+
