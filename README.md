@@ -1,4 +1,4 @@
-# nest-js
+# Nest-js
 
 Nếu bạn đã từng làm việc với một dự án NodeJs hay đã từng xây dựng một REST API cho một ứng dụng thì bạn sẽ nhận ra sự tẻ nhạt cùng như buồn chán trong quá trinh duy trì ứng dụng cũng như là maintain nó, đặc biệt là khi tiến hành mở rộng ứng dụng. Bạn càng thêm mới nhiều chức năng, thì code của bạn càng nhiều thêm.
 
